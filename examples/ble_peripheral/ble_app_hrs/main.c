@@ -67,6 +67,12 @@
 #include "HC_command_analysis.h"
 #include "protocol_analysis.h"
 
+//cole add..
+#include "afe4404_hw.h"
+#include "agc_V3_1_19.h"
+#include "hqerror.h"
+#include "pps960.h"
+
 //服务发现
 #define IS_SRVC_CHANGED_CHARACT_PRESENT  1                                           /**< Include or not the service_changed characteristic. if not enabled, the server's database cannot be changed for the lifetime of the device*/
 //主从机连接数量参数
@@ -142,8 +148,9 @@ extern bool StorySN;                     //是否存储SN
 extern nrf_drv_wdt_channel_id            m_channel_id;
 //广播状态
 bool ble_is_adv = false;                 //设备是否开启广播
+extern uint16_t acc_check;
 //广播UUID
-#define BLE_UUID_Naptime_Profile 0xFF00
+#define BLE_UUID_Naptime_Profile 0xFF30
 static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_Naptime_Profile, BLE_UUID_TYPE_VENDOR_BEGIN}}; /**< Universally unique service identifiers. */
 
 /**@brief Function for the GAP initialization.
@@ -285,15 +292,15 @@ static void services_init(void)
 	  ble_conn_init_t  conn_init;
     ble_eeg_init_t   eeg_init;
 
-	  memset(&com_init, 0, sizeof(com_init));
-    com_init.data_handler = NULL;   
-    err_code = ble_com_init(&m_com, &com_init);
-    APP_ERROR_CHECK(err_code);
+//	  memset(&com_init, 0, sizeof(com_init));
+//    com_init.data_handler = NULL;   
+//    err_code = ble_com_init(&m_com, &com_init);
+//    APP_ERROR_CHECK(err_code);
 
-	  memset(&conn_init, 0, sizeof(conn_init));
-    conn_init.data_handler = NULL;   
-    err_code = ble_conn_init(&m_conn, &conn_init);
-    APP_ERROR_CHECK(err_code);
+//	  memset(&conn_init, 0, sizeof(conn_init));
+//    conn_init.data_handler = NULL;   
+//    err_code = ble_conn_init(&m_conn, &conn_init);
+//    APP_ERROR_CHECK(err_code);
 
     memset(&eeg_init, 0, sizeof(eeg_init));
     eeg_init.evt_handler = NULL;
@@ -301,9 +308,9 @@ static void services_init(void)
     APP_ERROR_CHECK(err_code);
 
     // Initialize Battery Service.
-    ble_battory_serv_init();
+//    ble_battory_serv_init();
     // Initialize Device Information Service.
-    ble_devinfo_serv_init();
+//    ble_devinfo_serv_init();
 		
 #ifdef BLE_DFU_APP_SUPPORT
     /** @snippet [DFU BLE Service initialization] */
@@ -506,7 +513,7 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 						else                         //正常工作模式
 						{
 				        connection_buttons_configure();	  
-				        connects_timer_start();
+//				        connects_timer_start();
 								LED_timeout_restart();
 								if(bat_vol_pre < bat_vol_pre_work)    //电量低于使用电压
 								{
@@ -519,6 +526,8 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 										APP_ERROR_CHECK(err_code);	
 								}
 						}
+						Global_connected_state = true;
+						ads1291_init();						
             break;
 
           case BLE_GAP_EVT_DISCONNECTED:
@@ -533,17 +542,17 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 					  err_code = bsp_led_indication(BSP_INDICATE_IDLE);
             APP_ERROR_CHECK(err_code);
 						Global_connected_state = false;
-				    m_bas.is_battery_notification_enabled = false;
+//				    m_bas.is_battery_notification_enabled = false;
 				    m_eeg.is_eeg_notification_enabled = false;
 				    m_eeg.is_state_notification_enabled = false;
-				    m_com.is_com_notification_enabled = false;
-				    m_conn.is_Shakehands_notification_enabled = false;
-				    m_conn.is_state_notification_enabled = false;
+//				    m_com.is_com_notification_enabled = false;
+//				    m_conn.is_Shakehands_notification_enabled = false;
+//				    m_conn.is_state_notification_enabled = false;
             if(ads1291_is_init == true)
 						{
 					   	 ADS1291_disable();
 						}
-					  connects_timer_stop();
+//					  connects_timer_stop();
             break;
 
           case BLE_GATTS_EVT_TIMEOUT:
@@ -582,9 +591,9 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
  */
 static void ble_evt_dispatch(ble_evt_t * p_ble_evt)
 {
-    ble_bas_on_ble_evt(&m_bas, p_ble_evt);
-	  ble_com_on_ble_evt(&m_com, p_ble_evt);
-	  ble_conn_on_ble_evt(&m_conn, p_ble_evt);
+//    ble_bas_on_ble_evt(&m_bas, p_ble_evt);
+//	  ble_com_on_ble_evt(&m_com, p_ble_evt);
+//	  ble_conn_on_ble_evt(&m_conn, p_ble_evt);
     ble_eeg_on_ble_evt(&m_eeg, p_ble_evt);
     on_ble_evt(p_ble_evt);
     dm_ble_evt_handler(p_ble_evt);
@@ -905,13 +914,21 @@ int main(void)
 		
     charging_check();	
     Power_Check();
-		button_power_on();
+//		button_power_on();
  
 		if((!ble_is_adv) && (ble_is_connect == false))
 		{
 			  err_code = ble_advertising_start(BLE_ADV_MODE_FAST);
         APP_ERROR_CHECK(err_code);
 		}
+		/* Initializing TWI master interface for EEPROM */
+		err_code = twi_master_init();
+		APP_ERROR_CHECK(err_code);		
+		init_pps960_sensor();
+		acc_check = 1;
+		
+		pps960_rd_raw_timer_start();
+		pps960_alg_timer_start();		
 		
 		while(1)
     {

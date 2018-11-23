@@ -39,4 +39,11 @@ void ledFlips_timer_init(void);
 void ledFlips_timer_start(uint16_t ms);
 void ledFlips_timer_stop(void);
 
+void pps960_rd_raw_timer_init(void);
+void pps960_rd_raw_timer_start(void);
+void pps960_rd_raw_timer_stop(void);
+void pps960_alg_timer_init(void);
+void pps960_alg_timer_start(void);
+void pps960_alg_timer_stop(void);
+
 #endif

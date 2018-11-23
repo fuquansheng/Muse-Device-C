@@ -5,7 +5,7 @@ ble_bas_t               m_bas;                                     /**< Structur
 ble_com_t               m_com;                                     /**< Structure to identify the Nordic UART Service. */
 
 /*******************数据吞吐量测试*********************/
-uint16_t data_len = 150;             //发送数据总长度
+uint16_t data_len = 300;             //发送数据总长度
 uint16_t m_data_left_to_send = 0;    //剩余需要发送的数据长度
 static uint8_t Data_send[17];        //发送数据缓存
 static uint8_t m_ble_pl_len = 15;    //每一次发送数据长度
@@ -21,19 +21,25 @@ extern uint8_t device_id_send[17];   //发送的device_id
 extern uint8_t device_sn_send[17];   //发送的SN
 extern uint8_t user_id_send[5];      //发送的SN
 
+extern uint16_t lifeQhrm;
+extern int8_t skin;
+extern uint8_t LOFF_State;
+
 //调用该函数发送第一帧数据
 void ble_send_data(void)
 {
     uint32_t err_code;  
     m_data_left_to_send = data_len;
 	  
-		Data_send[0] = Num_Time >> 8;    //添加帧头--2个字节
-		Data_send[1] = Num_Time & 0xFF;
+//		Data_send[0] = Num_Time >> 8;    //添加帧头--2个字节
+//		Data_send[1] = Num_Time & 0xFF;
 
 	  for(uint8_t i = 0; i < m_ble_pl_len ; i++)
 		{
-			Data_send[i+2] = *(EEG_DATA_SEND + data_len - m_data_left_to_send + i);
+			Data_send[i] = *(EEG_DATA_SEND + data_len - m_data_left_to_send + i);
 		}
+		Data_send[15] = lifeQhrm;
+		Data_send[16] = LOFF_State;
 		m_data_left_to_send -= m_ble_pl_len;
 			 
 		err_code = ble_EEG_DATA_send(&m_eeg, Data_send, m_ble_pl_len + 2);   //数据发送，长度17字节
@@ -63,16 +69,16 @@ void ble_send_more_data(void)
 	uint32_t err_code;
 	while(m_data_left_to_send != 0 && Global_connected_state)
 	{
-		Data_send[0] = Num_Time >> 8;
-		Data_send[1] = Num_Time & 0xFF;
+//		Data_send[0] = Num_Time >> 8;
+//		Data_send[1] = Num_Time & 0xFF;
 
 		for(uint8_t i = 0; i < m_ble_pl_len ;i++)
 		{
-			Data_send[i+2]= *(EEG_DATA_SEND + data_len - m_data_left_to_send + i);
+			Data_send[i]= *(EEG_DATA_SEND + data_len - m_data_left_to_send + i);
 		}
 		m_data_left_to_send -= m_ble_pl_len;
 
-		err_code = ble_EEG_DATA_send(&m_eeg,Data_send, m_ble_pl_len + 2 );
+		err_code = ble_EEG_DATA_send(&m_eeg,Data_send, m_ble_pl_len);
 		if(RTT_PRINT)
 		{
 			 SEGGER_RTT_printf(0,"err_code2:%x\r",err_code);		

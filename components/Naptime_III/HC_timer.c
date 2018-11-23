@@ -11,6 +11,9 @@ APP_TIMER_DEF(m_buttons_timer_id);
 APP_TIMER_DEF(m_batterys_timer_id); 
 APP_TIMER_DEF(m_connects_timer_id); 
 APP_TIMER_DEF(m_ledFlips_timer_id); 
+//cole add
+APP_TIMER_DEF(m_pps960_rd_raw_timer_id);                     
+APP_TIMER_DEF(m_pps960_alg_timer_id); 
 
 //全局变量
 bool Is_led_timer_start = false;    //LED亮灯时间计时判断，如果亮灯中途切换状态，重新计时
@@ -22,6 +25,8 @@ extern nrf_drv_wdt_channel_id      m_channel_id;
 extern bsp_button_event_cfg_t      m_buttin_events;
 
 extern void button_event_handler(button_event_t event);
+extern void pps960_sensor_task(void *params);
+extern void pps960_sensor_task2(void *params);
 
 #define wdt_timer_interval           APP_TIMER_TICKS(4000, APP_TIMER_PRESCALER)
 #define led_timer_interval           APP_TIMER_TICKS(120000, APP_TIMER_PRESCALER)     
@@ -29,6 +34,9 @@ extern void button_event_handler(button_event_t event);
 #define battery_timer_interval       APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER) 
 #define led_test_timer_interval      APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)
 #define connect_timer_interval       APP_TIMER_TICKS(30000, APP_TIMER_PRESCALER)      //时间30s待定
+//cole add...
+#define PPS960_ALG_INTERVAL          APP_TIMER_TICKS(1000, APP_TIMER_PRESCALER)  /**< algorithm calculate HR every 1s. */
+#define PPS960_RD_RAW_INTERVAL       APP_TIMER_TICKS(40, APP_TIMER_PRESCALER)  /**< 40ms for PPS960 read raw data. */
 
 void timers_init(void)
 {
@@ -43,6 +51,8 @@ void timers_init(void)
 	  connects_timer_init();
 	  led_test_timer_init();
 	  ledFlips_timer_init();
+		pps960_rd_raw_timer_init();
+		pps960_alg_timer_init();
 }
 //LED定时器
 void leds_timer_handler(void * p_context)
@@ -243,5 +253,59 @@ void ledFlips_timer_stop(void)
 {
     uint32_t err_code;
     err_code = app_timer_stop(m_ledFlips_timer_id);
+    APP_ERROR_CHECK(err_code);
+}
+//采集心率原始数据
+void pps960_rd_raw_timer_handler(void * p_context)
+{
+//	  SEGGER_RTT_printf(0," 40ms \n");
+    UNUSED_PARAMETER(p_context);
+	  pps960_sensor_task(NULL);
+}
+
+void pps960_rd_raw_timer_init(void)
+{
+	  uint32_t err_code;
+    err_code = app_timer_create(&m_pps960_rd_raw_timer_id,APP_TIMER_MODE_REPEATED,pps960_rd_raw_timer_handler);
+    APP_ERROR_CHECK(err_code);
+}
+
+void pps960_rd_raw_timer_start(void)
+{
+	  uint32_t err_code;
+		err_code = app_timer_start(m_pps960_rd_raw_timer_id, PPS960_RD_RAW_INTERVAL, NULL); 
+    APP_ERROR_CHECK(err_code);
+}
+void pps960_rd_raw_timer_stop(void)
+{
+    uint32_t err_code;
+    err_code = app_timer_stop(m_pps960_rd_raw_timer_id);
+    APP_ERROR_CHECK(err_code);
+}
+
+//心率数据处理
+void pps960_alg_timer_handler(void * p_context)
+{
+//	  SEGGER_RTT_printf(0," 1s \n");
+    UNUSED_PARAMETER(p_context);
+    pps960_sensor_task2(NULL);	
+}
+void pps960_alg_timer_init(void)
+{
+	  uint32_t err_code;
+    err_code = app_timer_create(&m_pps960_alg_timer_id,APP_TIMER_MODE_REPEATED,pps960_alg_timer_handler);
+    APP_ERROR_CHECK(err_code);	
+}
+
+void pps960_alg_timer_start(void)
+{
+	  uint32_t err_code;
+		err_code = app_timer_start(m_pps960_alg_timer_id,PPS960_ALG_INTERVAL, NULL); 
+    APP_ERROR_CHECK(err_code);
+}
+void pps960_alg_timer_stop(void)
+{
+    uint32_t err_code;
+    err_code = app_timer_stop(m_pps960_alg_timer_id);
     APP_ERROR_CHECK(err_code);
 }

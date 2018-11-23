@@ -25,7 +25,7 @@ extern bool Global_connected_state;
 #define BLE_UUID_COM_Up_CHARACTERISTIC     0xFF22                      /**< The UUID of the Up Characteristic. */
 #define BLE_UUID_COM_Down_CHARACTERISTIC   0xFF21                      /**< The UUID of the Down Characteristic. */
 
-#define COM_BASE_UUID                  {{0x23, 0xD1, 0xBC, 0xEA, 0x5F, 0x78, 0x23, 0x15, 0xCD, 0xAB, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00}} /**< Used vendor specific UUID. */
+#define COM_BASE_UUID                  {{0x23, 0xD1, 0xBC, 0xEA, 0x6F, 0x78, 0x23, 0x15, 0xCD, 0xAB, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00}} /**< Used vendor specific UUID. */
 
 /**@brief Function for handling the @ref BLE_GAP_EVT_CONNECTED event from the S110 SoftDevice.
  *

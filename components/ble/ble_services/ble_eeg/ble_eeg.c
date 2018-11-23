@@ -26,10 +26,10 @@
 
 extern bool Global_connected_state;
  
-#define BLE_UUID_EEG_EEG_DATA_CHARACTERISTIC   0xFF31                      /**< The UUID of the RX Characteristic. */
-#define BLE_UUID_EEG_ELE_STATE_CHARACTERISTIC  0xFF32
+#define BLE_UUID_EEG_EEG_DATA_CHARACTERISTIC   0xFF32                      /**< The UUID of the RX Characteristic. */
+#define BLE_UUID_EEG_ELE_STATE_CHARACTERISTIC  0xFF31
 
-#define EEG_BASE_UUID  {{0x23, 0xD1, 0xBC, 0xEA, 0x5F, 0x78, 0x23, 0x15, 0xCD, 0xAB, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00}} /**< Used vendor specific UUID. */
+#define EEG_BASE_UUID  {{0x23, 0xD1, 0xBC, 0xEA, 0x6F, 0x78, 0x23, 0x15, 0xCD, 0xAB, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00}} /**< Used vendor specific UUID. */
 
 /**@brief Function for handling the Connect event.
  *
@@ -270,11 +270,11 @@ uint32_t ble_eeg_init(ble_eeg_t * p_eeg, const ble_eeg_init_t * p_eeg_init)
     }
 
     // Add ele state characteristic
-    err_code = eeg_ele_state_char_add(p_eeg, p_eeg_init);
-    if (err_code != NRF_SUCCESS)
-    {
-        return err_code;
-    }
+//    err_code = eeg_ele_state_char_add(p_eeg, p_eeg_init);
+//    if (err_code != NRF_SUCCESS)
+//    {
+//        return err_code;
+//    }
 				
 		// Add eeg data characteristic
     err_code = eeg_data_char_add(p_eeg, p_eeg_init);
