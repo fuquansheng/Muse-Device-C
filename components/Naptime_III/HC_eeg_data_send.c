@@ -5,13 +5,13 @@ ble_bas_t               m_bas;                                     /**< Structur
 ble_com_t               m_com;                                     /**< Structure to identify the Nordic UART Service. */
 
 /*******************数据吞吐量测试*********************/
-uint16_t data_len = 300;             //发送数据总长度
+uint16_t data_len = 288;             //发送数据总长度
 uint16_t m_data_left_to_send = 0;    //剩余需要发送的数据长度
-static uint8_t Data_send[17];        //发送数据缓存
-static uint8_t m_ble_pl_len = 15;    //每一次发送数据长度
+static uint8_t Data_send[20];        //发送数据缓存
+static uint8_t m_ble_pl_len = 18;    //每一次发送数据长度
 static uint8_t Num_Time = 0;         //帧头
 //static bool m_data_q;              //发送成功True
-extern uint8_t EEG_DATA_SEND[750];   //需要发送的数据
+extern uint8_t EEG_DATA_SEND[320];   //需要发送的数据
 extern bool Global_connected_state;
 extern bool ads1291_is_init;         //1291初始化标志位
 extern uint8_t send_bat_data;
@@ -34,15 +34,15 @@ void ble_send_data(void)
 //		Data_send[0] = Num_Time >> 8;    //添加帧头--2个字节
 //		Data_send[1] = Num_Time & 0xFF;
 
-	  for(uint8_t i = 0; i < m_ble_pl_len ; i++)
+	  for(uint8_t i = 0; i < m_ble_pl_len; i++)
 		{
 			Data_send[i] = *(EEG_DATA_SEND + data_len - m_data_left_to_send + i);
 		}
-		Data_send[15] = lifeQhrm;
-		Data_send[16] = LOFF_State;
+		Data_send[18] = lifeQhrm;
+		Data_send[19] = LOFF_State;
 		m_data_left_to_send -= m_ble_pl_len;
 			 
-		err_code = ble_EEG_DATA_send(&m_eeg, Data_send, m_ble_pl_len + 2);   //数据发送，长度17字节
+		err_code = ble_EEG_DATA_send(&m_eeg, Data_send, m_ble_pl_len+2);   //数据发送，长度17字节
 		if(RTT_PRINT)
 		{
 			 SEGGER_RTT_printf(0,"err_code1:%x\r",err_code);		

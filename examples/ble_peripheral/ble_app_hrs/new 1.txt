@@ -1,0 +1,67 @@
+//						if(cnt <= 320)
+//						{
+//   						for (uint32_t t = 0; t < p_ble_nus_evt->data_len; t++)
+//							{
+//								  data1[cnt] = p_ble_nus_evt->p_data[t];
+//									cnt ++;
+//							}
+//						}
+//						if(cnt == 320)
+//						{
+//							cnt = 0;
+//							LR = 0;
+//							printf("H%x\r\n",data1[3]);
+//							printf("S%x\r\n",data1[4]);		
+//							memcpy(data2,data1+5,300);							
+//							for (uint32_t i = 0; i < 300;)
+//							{
+//								app_uart_put(data2[i]);
+//								i++;
+//								  if(LR%2)
+//									{
+//										printf("EL%d\r\n",(data2[i]<<16) | (data2[i+1]<<8) | data2[i+2]);
+//										i = i+3;
+//									}
+//									else
+//									{
+//										printf("ER%d\r\n",(data2[i]<<16) | (data2[i+1]<<8) | data2[i+2]);
+//										i = i+3;										
+//									}
+//									LR++;
+//							}
+//						}
+//							for (uint32_t i = 0; i < p_ble_nus_evt->data_len; i++)
+//							{
+//								  if(cnt%2)
+//									{
+//										printf("EL%d\r\n",(p_ble_nus_evt->p_data[i]<<16) | (p_ble_nus_evt->p_data[i+1]<<8) | p_ble_nus_evt->p_data[i+2]);
+//										i = i+3;
+//									}
+//									else
+//									{
+//										printf("ER%d\r\n",(p_ble_nus_evt->p_data[i]<<16) | (p_ble_nus_evt->p_data[i+1]<<8) | p_ble_nus_evt->p_data[i+2]);
+//										i = i+3;										
+//									}
+//									cnt ++;
+//							}
+//					  }
+//						if(p_ble_nus_evt->data_len == 17)
+//						{
+//							cnt = 0;
+//							for (uint32_t i = 0; i < p_ble_nus_evt->data_len; )
+//							{
+//								  if(cnt%2)
+//									{
+//										printf("EL%d\r\n",(p_ble_nus_evt->p_data[i]<<16) | (p_ble_nus_evt->p_data[i+1]<<8) | p_ble_nus_evt->p_data[i+2]);
+//										i = i+3;
+//									}
+//									else
+//									{
+//										printf("ER%d\r\n",(p_ble_nus_evt->p_data[i]<<16) | (p_ble_nus_evt->p_data[i+1]<<8) | p_ble_nus_evt->p_data[i+2]);
+//										i = i+3;										
+//									}
+//									cnt ++;
+//							}
+//							printf("H%d\r\n",p_ble_nus_evt->p_data[15]);
+//							printf("S%d\r\n",p_ble_nus_evt->p_data[16]);
+//					  }

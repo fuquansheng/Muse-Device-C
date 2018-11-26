@@ -11,7 +11,7 @@ extern int8_t skin;
 static uint8_t Data_Num;             //采集数据到250个触发发送函数
 static ADS_ConfigDef ADS_Config1;
 
-uint8_t EEG_DATA_SEND[300];
+uint8_t EEG_DATA_SEND[320];
 uint8_t LOFF_State = 0;
 bool ads1291_is_init = false; //1291是否初始化完成标志位
 
@@ -175,27 +175,29 @@ void pin_event_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 		   memcpy((ADCData1 + Data_Num * 6),Data,6);
 
 		   Data_Num ++;
-//       if(Data_Num == 50)  
-			 if(Data_Num == data_len / 6 && m_data_left_to_send == 0)  
+       if(Data_Num == 48)  
+//			 if(Data_Num == data_len / 6 && m_data_left_to_send == 0)  
 	     {
 				  LOFF_State = ((Rx[0]<<4) & 0x70) | ((Rx[1] & 0x80)>>4);
 			    Data_Num = 0;
-			    memcpy(EEG_DATA_SEND,ADCData1,300);			
+			    memcpy(EEG_DATA_SEND,ADCData1,288);			
 				  memset(ADCData1,0,sizeof(ADCData1));
-//				  ADCData2[0] = 0xBB;
-//				  ADCData2[1] = 0xBB;
-//				  ADCData2[2] = 0xBB;
-//				  ADCData2[3] = lifeQhrm;
-//				  ADCData2[4] = LOFF_State;
-//				  ADCData2[305] = 0xFF;
-//				  ADCData2[306] = 0xFF;
-//				  ADCData2[307] = 0xFF;
-				 	SEGGER_RTT_printf(0," AD[0] :%x\r\n",((Rx[3]*0xFFFFFF)+(Rx[4]*0xFFFF)+Rx[5]*0xFF+0x80000000)>>8);
-          SEGGER_RTT_printf(0," AD[1] :%x\r\n",((Rx[6]*0xFFFFFF)+(Rx[7]*0xFFFF)+Rx[8]*0xFF+0x80000000)>>8);
+//				  EEG_DATA_SEND[0] = 0xBB;
+//				  EEG_DATA_SEND[1] = 0xBB;
+//				  EEG_DATA_SEND[2] = 0xBB;
+//				  EEG_DATA_SEND[3] = lifeQhrm;
+//				  EEG_DATA_SEND[4] = LOFF_State;
+//				  EEG_DATA_SEND[305] = 0xFF;
+//				  EEG_DATA_SEND[306] = 0xFF;
+//				  EEG_DATA_SEND[307] = 0xFF;
+//				  EEG_DATA_SEND[308] = 0x0D;
+//				  EEG_DATA_SEND[309] = 0x0A;
+//				 	SEGGER_RTT_printf(0," AD[0] :%x\r\n",((Rx[3]*0xFFFFFF)+(Rx[4]*0xFFFF)+Rx[5]*0xFF+0x80000000)>>8);
+//          SEGGER_RTT_printf(0," AD[1] :%x\r\n",((Rx[6]*0xFFFFFF)+(Rx[7]*0xFFFF)+Rx[8]*0xFF+0x80000000)>>8);
 
-				 SEGGER_RTT_printf(0," Rx[0] :%x\r\n",Rx[0]);
-				 SEGGER_RTT_printf(0," Rx[1] :%x\r\n",Rx[1]);
-				 SEGGER_RTT_printf(0," charging mode :%x\r\n",LOFF_State);
+//				 SEGGER_RTT_printf(0," Rx[0] :%x\r\n",Rx[0]);
+//				 SEGGER_RTT_printf(0," Rx[1] :%x\r\n",Rx[1]);
+//				 SEGGER_RTT_printf(0," charging mode :%x\r\n",LOFF_State);
 			    ble_send_data();
 		   }
 			 

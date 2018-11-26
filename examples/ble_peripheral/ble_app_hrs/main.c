@@ -87,7 +87,7 @@
 #define APP_TIMER_PRESCALER              0                                           /**< Value of the RTC1 PRESCALER register. */
 //连接参数
 #define MIN_CONN_INTERVAL                MSEC_TO_UNITS(15, UNIT_1_25_MS)             /**< Minimum acceptable connection interval (0.4 seconds). */
-#define MAX_CONN_INTERVAL                MSEC_TO_UNITS(30, UNIT_1_25_MS)             /**< Maximum acceptable connection interval (0.65 second). */
+#define MAX_CONN_INTERVAL                MSEC_TO_UNITS(20, UNIT_1_25_MS)             /**< Maximum acceptable connection interval (0.65 second). */
 #define SLAVE_LATENCY                    0                                           /**< Slave latency. */
 #define CONN_SUP_TIMEOUT                 (4 * 100)                                   /**< Connection supervisory timeout (4 seconds). */
 //连接间隔更新参数
@@ -399,7 +399,9 @@ static void gpio_reset(void)
 	  nrf_gpio_cfg_output(LED_GPIO_GREEN);
 	  nrf_gpio_cfg_output(AEF_PM_EN);
 	  nrf_gpio_cfg_output(TPS_CTRL);
+	  nrf_gpio_cfg_output(PPS_EN_PIN);
 
+	  NRF_GPIO->OUTCLR = 1<<PPS_EN_PIN;
 	  NRF_GPIO->OUTCLR = 1<<LED_GPIO_BLUE;
 	  NRF_GPIO->OUTCLR = 1<<LED_GPIO_RED;
 	  NRF_GPIO->OUTCLR = 1<<LED_GPIO_GREEN;
@@ -932,21 +934,21 @@ int main(void)
 		
 		while(1)
     {
-		  if(nrf_gpio_pin_read(BQ_PG) == 0 && !Into_factory_test_mode)     //input vol is above battery vol
-		  {
-				   nrf_delay_ms(20);
-				   if(nrf_gpio_pin_read(BQ_PG) == 0)
-					 {
-							 if(RTT_PRINT)
-							 {
-									SEGGER_RTT_printf(0," charging mode\r\n");
-							 }							 
-						   Global_connected_state = false;
-							 err_code = sd_power_gpregret_set(0x55);
-							 APP_ERROR_CHECK(err_code);
-							 sleep_mode_enter();
-					 }
-		  }
+//		  if(nrf_gpio_pin_read(BQ_PG) == 0 && !Into_factory_test_mode)     //input vol is above battery vol
+//		  {
+//				   nrf_delay_ms(20);
+//				   if(nrf_gpio_pin_read(BQ_PG) == 0)
+//					 {
+//							 if(RTT_PRINT)
+//							 {
+//									SEGGER_RTT_printf(0," charging mode\r\n");
+//							 }							 
+//						   Global_connected_state = false;
+//							 err_code = sd_power_gpregret_set(0x55);
+//							 APP_ERROR_CHECK(err_code);
+//							 sleep_mode_enter();
+//					 }
+//		  }
 			if(communocate_state[4] == 0x00 && ID_is_change)
 			{
 				   ID_is_change = false;
