@@ -117,10 +117,10 @@ STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                 
 static ble_dfu_t                         m_dfus;                                     /**< Structure used to identify the DFU service. */
 #endif // BLE_DFU_APP_SUPPORT
 //服务变量
-extern ble_bas_t                         m_bas;                                      /**< Structure used to identify the battery service. */
-extern ble_com_t                         m_com;                                      /**< Structure to identify the Nordic UART Service. */
+//extern ble_bas_t                         m_bas;                                      /**< Structure used to identify the battery service. */
+//extern ble_com_t                         m_com;                                      /**< Structure to identify the Nordic UART Service. */
 extern ble_eeg_t                         m_eeg;                                      /**< Structure used to identify the heart rate service. */
-extern ble_conn_t                        m_conn;                                     /**< Structure to identify the Nordic UART Service. */
+//extern ble_conn_t                        m_conn;                                     /**< Structure to identify the Nordic UART Service. */
 uint16_t                                 m_conn_handle;                              /**< Handle of the current connection. */
 static dm_application_instance_t         m_app_handle;                               /**< Application identifier allocated by device manager. */
 //eeg数据传输变量与标志位
@@ -288,8 +288,8 @@ static void reset_prepare(void)
 static void services_init(void)
 {
     uint32_t         err_code;
-	  ble_com_init_t   com_init;
-	  ble_conn_init_t  conn_init;
+//	  ble_com_init_t   com_init;
+//	  ble_conn_init_t  conn_init;
     ble_eeg_init_t   eeg_init;
 
 //	  memset(&com_init, 0, sizeof(com_init));
@@ -529,7 +529,8 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 								}
 						}
 						Global_connected_state = true;
-						ads1291_init();						
+						ads1291_init();		
+						
             break;
 
           case BLE_GAP_EVT_DISCONNECTED:
@@ -916,7 +917,7 @@ int main(void)
 		
     charging_check();	
     Power_Check();
-//		button_power_on();
+		button_power_on();
  
 		if((!ble_is_adv) && (ble_is_connect == false))
 		{
@@ -926,6 +927,7 @@ int main(void)
 		/* Initializing TWI master interface for EEPROM */
 		err_code = twi_master_init();
 		APP_ERROR_CHECK(err_code);		
+
 		init_pps960_sensor();
 		acc_check = 1;
 		
@@ -934,21 +936,21 @@ int main(void)
 		
 		while(1)
     {
-//		  if(nrf_gpio_pin_read(BQ_PG) == 0 && !Into_factory_test_mode)     //input vol is above battery vol
-//		  {
-//				   nrf_delay_ms(20);
-//				   if(nrf_gpio_pin_read(BQ_PG) == 0)
-//					 {
-//							 if(RTT_PRINT)
-//							 {
-//									SEGGER_RTT_printf(0," charging mode\r\n");
-//							 }							 
-//						   Global_connected_state = false;
-//							 err_code = sd_power_gpregret_set(0x55);
-//							 APP_ERROR_CHECK(err_code);
-//							 sleep_mode_enter();
-//					 }
-//		  }
+		  if(nrf_gpio_pin_read(BQ_PG) == 0 && !Into_factory_test_mode)     //input vol is above battery vol
+		  {
+				   nrf_delay_ms(20);
+				   if(nrf_gpio_pin_read(BQ_PG) == 0)
+					 {
+							 if(RTT_PRINT)
+							 {
+									SEGGER_RTT_printf(0," charging mode\r\n");
+							 }							 
+						   Global_connected_state = false;
+							 err_code = sd_power_gpregret_set(0x55);
+							 APP_ERROR_CHECK(err_code);
+							 sleep_mode_enter();
+					 }
+		  }
 			if(communocate_state[4] == 0x00 && ID_is_change)
 			{
 				   ID_is_change = false;
