@@ -94,7 +94,7 @@ void pps960_sensor_task(void *params)
 uint8_t cnt=0;
 uint16_t lifeHR = 0;
 uint16_t lifeskin = 0;
-extern uint8_t EEG_DATA_SEND[750];
+extern uint8_t EEG_DATA_SEND[320];
 void pps960_sensor_task2(void *params)
 {
 //	  uint32_t err_code;
