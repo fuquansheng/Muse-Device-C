@@ -31,6 +31,7 @@ int8_t snrValue = 0,skin = 0,sample = 0;
 uint16_t acc_check=0;
 uint16_t acc_check2=0;
 uint8_t pps964_is_init = 0; 
+uint8_t PPS960_readReg_faile = 0;
 
 int8_t hr_okflag=false;
 int8_t Stablecnt=0;
@@ -109,7 +110,7 @@ void pps960_sensor_task2(void *params)
 						snrValue=PP_GetHRConfidence();//for snr check
 						//skin = PP_IsSensorContactDetected();//for skin detect
 						skin = PPS_get_skin_detect();
-						if(skin == 0)
+						if(skin == 0 && PPS960_readReg_faile == 0)
 						{
 							lifeQhrm = 0;
 						}
@@ -163,6 +164,7 @@ void PPS960_writeReg(uint8_t regaddr, uint32_t wdata)
 			else if(0x8202==ret){SEGGER_RTT_printf(0,"i2c Nack error!");}
 //			SEGGER_RTT_printf(0,"PPS960_writeReg faile!!! %x\r\n",ret);
 			//printf("PPS960_writeReg faile!!! %d\r\n",ret);
+			PPS960_readReg_faile = 1;	
 		}
 }
 
@@ -184,6 +186,7 @@ uint32_t PPS960_readReg(uint8_t regaddr)
 			else if(0x8202==ret){SEGGER_RTT_printf(0,"i2c Nack error!");}
 //			SEGGER_RTT_printf(0,"PPS960_readReg faile!!! %x\r\n",ret);
            //break;
+			PPS960_readReg_faile = 1;	
        }
        ret = nrf_drv_twi_rx(&m_twi_master, PPS960_ADDR, temp, 3);
     }while (0);
@@ -193,6 +196,7 @@ uint32_t PPS960_readReg(uint8_t regaddr)
 			else if(0x8202==ret){SEGGER_RTT_printf(0,"i2c Nack error!");}
 //			SEGGER_RTT_printf(0,"PPS960_readReg faile!!! %x\r\n",ret);
 			//printf("PPS960_readReg faile!!! %d\r\n",ret);
+			PPS960_readReg_faile = 1;	
 		}
 		
     rdtemp = temp[0]<<16 | temp[1]<<8 | temp[2];

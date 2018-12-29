@@ -125,6 +125,7 @@ uint16_t                                 m_conn_handle;                         
 static dm_application_instance_t         m_app_handle;                               /**< Application identifier allocated by device manager. */
 //eeg数据传输变量与标志位
 extern bool ads1291_is_init;             //1291初始化标志位
+extern uint8_t PPS960_readReg_faile;
 //连接状态标志位
 extern bool Is_white_adv;                //是否白名单广播
 extern bool ID_is_change;                //接收到的ID与原先ID不同，可能需要更新绑定ID
@@ -976,6 +977,15 @@ int main(void)
 				  StorySN = false;
 				  Story_SN();
 			}
-		  power_manage();
+		  if(PPS960_readReg_faile == 1)
+			{
+//					nrf_gpio_cfg_output(PPS_EN_PIN);
+//					NRF_GPIO->OUTCLR = 1<<PPS_EN_PIN;				
+//				  nrf_delay_ms(100);
+				  SEGGER_RTT_printf(0," PPS960_readReg_faile %d\n",PPS960_readReg_faile);
+				  init_pps960_sensor();
+				  PPS960_readReg_faile = 0;
+			}
+			power_manage();
     }
 }
