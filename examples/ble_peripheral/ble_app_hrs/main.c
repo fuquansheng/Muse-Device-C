@@ -125,8 +125,9 @@ uint16_t                                 m_conn_handle;                         
 static dm_application_instance_t         m_app_handle;                               /**< Application identifier allocated by device manager. */
 //eeg数据传输变量与标志位
 extern bool ads1291_is_init;             //1291初始化标志位
-extern uint8_t PPS960_readReg_faile;
-//连接状态标志位
+extern bool pps964_is_init;              //PPS964是否初始化
+extern uint8_t PPS960_readReg_faile; 
+//连接状态标志位 
 extern bool Is_white_adv;                //是否白名单广播
 extern bool ID_is_change;                //接收到的ID与原先ID不同，可能需要更新绑定ID
 extern bool Is_device_bond;              //设备是否绑定
@@ -530,8 +531,14 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 								}
 						}
 						Global_connected_state = true;
-						ads1291_init();		
-						
+						if(ads1291_is_init == false) 
+						{
+								ads1291_init();	
+						}	
+				    if(pps964_is_init == false) 
+						{
+								pps960_init();
+						}	
             break;
 
           case BLE_GAP_EVT_DISCONNECTED:
@@ -552,10 +559,14 @@ static void on_ble_evt(ble_evt_t * p_ble_evt)
 //				    m_com.is_com_notification_enabled = false;
 //				    m_conn.is_Shakehands_notification_enabled = false;
 //				    m_conn.is_state_notification_enabled = false;
-            if(ads1291_is_init == true)
+				    if(ads1291_is_init == true) 
 						{
-					   	 ADS1291_disable();
-						}
+								ADS1291_disable();
+						}	
+				    if(pps964_is_init == true) 
+						{
+								pps960_disable();
+						}	
 //					  connects_timer_stop();
             break;
 
@@ -928,12 +939,6 @@ int main(void)
 		/* Initializing TWI master interface for EEPROM */
 		err_code = twi_master_init();
 		APP_ERROR_CHECK(err_code);		
-
-		init_pps960_sensor();
-		acc_check = 1;
-		
-		pps960_rd_raw_timer_start();
-		pps960_alg_timer_start();		
 		
 		while(1)
     {
@@ -977,13 +982,11 @@ int main(void)
 				  StorySN = false;
 				  Story_SN();
 			}
-		  if(PPS960_readReg_faile == 1)
+			if(pps964_is_init && PPS960_readReg_faile == 1)
 			{
-//					nrf_gpio_cfg_output(PPS_EN_PIN);
-//					NRF_GPIO->OUTCLR = 1<<PPS_EN_PIN;				
-//				  nrf_delay_ms(100);
 				  SEGGER_RTT_printf(0," PPS960_readReg_faile %d\n",PPS960_readReg_faile);
-				  init_pps960_sensor();
+				  pps960_disable();
+				  pps960_init();
 				  PPS960_readReg_faile = 0;
 			}
 			power_manage();

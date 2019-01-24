@@ -10,11 +10,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include "app_util_platform.h"
+#include "nrf.h"
 #include "nrf_drv_twi.h"
 #include "nrf_gpio.h" 
 #include "nrf_delay.h"
 #include "app_timer.h"
+#include "app_error.h"
+#include "app_util_platform.h"
 #include "afe4404_hw.h"
 #include "agc_V3_1_19.h"
 #include "hqerror.h"
@@ -24,26 +26,17 @@
 #include "SEGGER_RTT_Conf.h"
 #include "SEGGER_RTT.h"
 #include "HC_uart.h"
+#include "HC_timer.h"
+
+
+uint16_t acc_check=0;
+bool pps964_is_init = false;   //1291是否初始化完成标志位
+uint8_t PPS960_readReg_faile = 0;
 
 uint16_t lifeQhrm = 0;
 int8_t snrValue = 0,skin = 0,sample = 0;
  
-uint16_t acc_check=0;
-uint16_t acc_check2=0;
-uint8_t pps964_is_init = 0; 
-uint8_t PPS960_readReg_faile = 0;
-
-int8_t hr_okflag=false;
-int8_t Stablecnt=0;
-int8_t Unstablecnt=0;
-
 int8_t HR_HRV_enable=0;//0=>HR;1=>HRV;2=>HR+HRV;
-
-uint32_t displayHrm = 0;
-uint32_t pps_count;
-uint32_t pps_intr_flag=0;
-int8_t accPushToQueueFlag=0;
-extern uint16_t AccBuffTail;
 
 void PPS_DELAY_MS(uint32_t ms)
 {
@@ -58,14 +51,22 @@ void pps960_Rest_SW(void)
 
 void pps960_disable(void)
 {
-	pps964_is_init = 0;
+	pps964_is_init = false;
+	pps960_rd_raw_timer_stop();
+	pps960_alg_timer_stop();
+	nrf_gpio_cfg_output(PPS_EN_PIN);
 	nrf_gpio_pin_write(PPS_EN_PIN, 0);
 	PPS_DELAY_MS(200);
+//	SEGGER_RTT_printf(0," pps964_is_init:%d \n",__FPU_USED);
+	#if (__FPU_USED == 1)
+  __set_FPSCR(__get_FPSCR() & ~(0x0000009F)); 
+ (void) __get_FPSCR();
+  NVIC_ClearPendingIRQ(FPU_IRQn);
+  #endif
 }
 
-void init_pps960_sensor(void)
+void pps960_init(void)
 {
-	  pps964_is_init = 1;
 	  nrf_gpio_cfg_output(PPS_EN_PIN);
 	  nrf_gpio_pin_write(PPS_EN_PIN, 1);
 	  PPS_DELAY_MS(200);
@@ -76,6 +77,11 @@ void init_pps960_sensor(void)
 	
     init_PPS960_register();
     PPS960_init();
+	
+	  pps964_is_init = true;
+		pps960_rd_raw_timer_start();
+		pps960_alg_timer_start();
+	  SEGGER_RTT_printf(0," pps964_is_init:%d \n",pps964_is_init);
 }
 
 extern uint8_t control;
@@ -83,8 +89,7 @@ uint8_t pps_test_flag=0;
 //uint8_t pps960_init_flag = 0;
 void pps960_sensor_task(void *params)
 {
-      pps_intr_flag = 0;
-			if(acc_check){
+			if(pps964_is_init){
 							ALGSH_retrieveSamplesAndPushToQueue();//read pps raw data
 							//move ALGSH_dataToAlg(); to message queue loop. and then send message at here.
 							ALGSH_dataToAlg();
@@ -100,7 +105,7 @@ void pps960_sensor_task2(void *params)
 {
 //	  uint32_t err_code;
 	 
-		if(acc_check) {
+		if(pps964_is_init) {
 				//if(GetHRSampleCount()==25) { // for 1s to update display
 						sample=GetHRSampleCount();
 						ClrHRSampleCount();
@@ -121,13 +126,9 @@ void pps960_sensor_task2(void *params)
 
 //			      lifeHR = lifeQhrm;
 //            lifeskin = skin;
-						
-
-
-						displayHrm = lifeQhrm;// 
 
 				//}
-		}//if(acc_check)
+		}
 }
 
 //=============================================================================
