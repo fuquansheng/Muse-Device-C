@@ -87,9 +87,8 @@ void ble_send_more_data(void)
 			{
 				Data_send[i]= *(EEG_DATA_SEND + data_len - m_data_left_to_send + i);
 			}
-			m_data_left_to_send -= m_data_left_to_send;
-
-			err_code = ble_EEG_DATA_send(&m_eeg,Data_send, m_data_left_to_send);			
+			err_code = ble_EEG_DATA_send(&m_eeg,Data_send, m_data_left_to_send);
+			m_data_left_to_send -= m_data_left_to_send;			
 		}
 		if(RTT_PRINT)
 		{
