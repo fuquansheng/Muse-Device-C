@@ -71,6 +71,7 @@ void ble_send_more_data(void)
 	{
 //		Data_send[0] = Num_Time >> 8;
 //		Data_send[1] = Num_Time & 0xFF;
+//		SEGGER_RTT_printf(0,"m_data_left_to_send:%d\r\n",m_data_left_to_send);
 		if(m_data_left_to_send >= 18)
 		{
 			for(uint8_t i = 0; i < m_ble_pl_len ;i++)
@@ -88,7 +89,7 @@ void ble_send_more_data(void)
 				Data_send[i]= *(EEG_DATA_SEND + data_len - m_data_left_to_send + i);
 			}
 			err_code = ble_EEG_DATA_send(&m_eeg,Data_send, m_data_left_to_send);
-			m_data_left_to_send -= m_data_left_to_send;			
+			m_data_left_to_send -= m_data_left_to_send;
 		}
 		if(RTT_PRINT)
 		{
@@ -98,7 +99,14 @@ void ble_send_more_data(void)
 			err_code == NRF_ERROR_INVALID_STATE || 
 			err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING)
 			{
+				if(m_data_left_to_send == 0)
+				{
+					m_data_left_to_send = 12;
+				}
+				else
+				{
 				 m_data_left_to_send += m_ble_pl_len; 
+				}
 				 break;
 			}
 		else if (err_code != NRF_SUCCESS) 
